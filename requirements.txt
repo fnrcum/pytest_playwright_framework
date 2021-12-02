@@ -1,0 +1,13 @@
+slugify
+pathlib
+
+python-slugify
+playwright
+pytest
+pytest-xdist
+requests
+filelock
+pytest-base-url
+pytest-reporter
+pytest-reporter-html1
+pytest-rerunfailures

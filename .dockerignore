@@ -1,0 +1,8 @@
+.pytest_cache
+.idea
+.DS_STORE
+venv
+<TemporaryDirectory*
+log
+results
+reports
