@@ -84,25 +84,37 @@ def pytest_runtest_makereport(item: Any) -> Generator[None, Any, None]:
     rep = outcome.get_result()
 
     test_fn = item.obj
+    rep.extra = []
     # get the test level docstrings as test long descriptions
     docstring = getattr(test_fn, '__doc__')
     if docstring:
         rep.description = docstring
     # set a report attribute for each phase of a call, which can
     # be "setup", "call", "teardown"
+
+    if rep.when == 'setup':
+        rep.extra.append(
+            {
+                "name": "Browser Channel",
+                "format": "text",
+                "content": f"{'' if not item.funcargs['browser_channel'] else item.funcargs['browser_channel']}"
+            }
+        )
     if rep.when == 'call' and rep.failed is True:
-        rep.extra = [
+        rep.extra.append(
             {
                 "name": "Screenshot",
                 "format": "image",
                 "content": os.path.join(os.getcwd(), "reports", slugify(rep.nodeid), f"{item.name}.png"),
-            },
+            }
+        )
+        rep.extra.append(
             {
                 "name": "Recording",
                 "format": "video",
                 "content": os.path.join(os.getcwd(), "reports", slugify(rep.nodeid), f"{item.name}.webm"),
             },
-        ]
+        )
 
     setattr(item, "rep_" + rep.when, rep)
 
@@ -162,7 +174,7 @@ def event_loop() -> Generator[AbstractEventLoop, None, None]:
 
 
 @pytest.fixture(scope="session")
-def browser_type_launch_args(pytestconfig: Any) -> Dict:
+def browser_type_launch_args(pytestconfig: Any, browser_name: str) -> Dict:
     launch_options = {}
     headed_option = pytestconfig.getoption("--headed")
     if headed_option:
@@ -187,7 +199,7 @@ def _build_artifact_test_folder(
 def browser_context_args(
     pytestconfig: Any,
     playwright: Playwright,
-    device: Optional[str],
+    device: Optional[str]
 ) -> Dict:
     context_args = {}
     if device:
@@ -199,7 +211,7 @@ def browser_context_args(
     video_option = pytestconfig.getoption("--video")
     capture_video = video_option in ["on", "retain-on-failure"]
     if capture_video:
-        context_args["record_video_dir"] = artifacts_folder
+        context_args["record_video_dir"] = artifacts_folder.name
 
     return context_args
 
@@ -299,7 +311,7 @@ def context(
             if not video:
                 continue
             try:
-                video_path = video.path()
+                # video_path = video.path()
                 # file_name = os.path.basename(video_path)
                 file_name = request.node.name + ".webm"
                 video.save_as(
@@ -346,7 +358,7 @@ def browser_name(pytestconfig: Any) -> Optional[str]:
     return browser_names[0]
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def browser_channel(pytestconfig: Any) -> Optional[str]:
     return pytestconfig.getoption("--browser-channel")
 
@@ -376,6 +388,7 @@ def pytest_addoption(parser: Any) -> None:
         "--browser-channel",
         action="store",
         default=None,
+        choices=["chrome", "chrome-beta", "msedge", "msedge-beta", "msedge-dev"],
         help="Browser channel to be used.",
     )
     group.addoption(

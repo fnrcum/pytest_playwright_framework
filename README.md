@@ -15,19 +15,32 @@
     1.  Alternatively you can add that environment variable to the system/user itself in windows
     2.  For more information about environment variables, please google:  `How to add environment vairables on [OS type]`
 3.  Run the tests in the following ways:
-    1.  To run ALL tests, run the following command:  `pytest`
-    2.  To run a specific tag, run the following command:  `pytest -m login`  where “login” is the tag name
-    3.  To run tests by filters with logical operators:
-        1.  `pytest -m "not login"`  Will run all tests that do not have the tag  `login`
-        2.  `pytest -m "login and api"`  Will run all tests that have both tags at the same time
-        3.  `pytest -m "login or api"`  Will run all tests that have at least 1 of the 2 tags
-    4.  To run tests in a specific file:  `pytest tests/test_login_page.py`
-    5.  To run a specific test from a file without using tags:  `pytest tests/test_playground.py::Tests::test_input`  where “Tests” is the class and “test_input” is the specific test
-    6.  To run tests in headed mode:  `pytest -m login --headed`
-    7.  To run tests on a specific browser (default is chromium):  `pytest -m login --browser firefox`
-        1.  To run tests on multiple browsers: ``pytest -m login --browser firefox --browser chromium --browser webkit`
+    1. To run ALL tests, run the following command:  `pytest`
+    2. To run a specific tag, run the following command:  `pytest -m playground`  where “login” is the tag name
+    3. To run tests by filters with logical operators:
+        1.  `pytest -m "not playground"`  Will run all tests that do not have the tag  `login`
+        2.  `pytest -m "playground and api"`  Will run all tests that have both tags at the same time
+        3.  `pytest -m "playground or api"`  Will run all tests that have at least 1 of the 2 tags
+    4. To run tests in a specific file:  `pytest tests/test_login_page.py`
+    5. To run a specific test from a file without using tags:  `pytest tests/test_playground.py::Tests::test_input`  where “Tests” is the class and “test_input” is the specific test
+    6. To run tests in headed mode:  `pytest -m playground --headed`
+    7. To run tests on a specific browser (default is chromium):  `pytest -m playground --browser firefox`
+        1.  To run tests on multiple browsers: `pytest -m playground --browser firefox --browser chromium --browser webkit`
         2.  Playwright supports Chrome (chromium), Firefox and Safari/Mobile (webkit)   
-    8.  To run tests and get a list of the slowest tests run the tests in the following way:  `pytest -m login --durations=2 --durations-min=0.1`  where  `--durations=2`  are the number of tests to be displayed and  `--durations-min=0.1`  is the minimum duration above which to collet the info in seconds 
+    8. To run tests and get a list of the slowest tests run the tests in the following way:  `pytest -m playground --durations=2 --durations-min=0.1`  where  `--durations=2`  are the number of tests to be displayed and  `--durations-min=0.1`  is the minimum duration above which to collect the info in seconds
+    9. To run tests with coverage: `pytest -v --cov PAF --cov-report html -m playground`
+    10. To run tests with the rerun module: `pytest -m "not playground --reruns 5` where `5` is the number of times the tests will be retried before the result is final
+        1. You can also add a delay (in seconds) between the reruns: `--reruns-delay 1`
+        2. You can also specify to only rerun the tests on specific errors: `--only-rerun AssertionError --only-rerun ValueError`
+           1. Note that the errors come from python and any Python based error is supported
+        3. Tests cal also be marked as flaky and reran individually 
+        ```python 
+        @pytest.mark.flaky(reruns=5, reruns_delay=2)
+        ```
+        4. Tests can also be marked for reruns based on conditions such as running platform
+        ```python 
+        @pytest.mark.flaky(reruns=5, condition=sys.platform.startswith("win32"))
+        ```
 4.  After test execution, a reports folder will be created which will have a  `report.html`  file and folders containing the screenshots and video recordings of the failing tests.
     1.  The report will display the screenshots and the videos of the failing tests as embedded so even if  `report.html`  is moved or sent through an email, it should still contain them
 
@@ -39,20 +52,33 @@
     1.  `-t paf`  tells docker to name the docker image  `paf`
 4.  After the image is created, make sure you have a folder called  `reports`  in your current path
 5.  To run all tests from the docker image:  `docker run -d -e ENVIRONMENT="<some env>" --rm -v ${PWD}/reports:/paf/reports --name pff paf --template=html1/index.html`
-    1.  `-d`  tells docker to run in detached mode
-    2.  `-e ENVIRONMENT="<some env>"`  tells docker to add an environment variable called  `ENVIRONMENT`  with the value  `<some env>`
-    3.  `--rm`  tells docker to remove the container after it finished
-    4.  `-v ${PWD}/reports:/paf/reports`  tells docker to attach your current path to the  `reports`  folder to the  `/paf/reports`  folder inside docker to have access to the reports after completion
+    1. `-d`  tells docker to run in detached mode
+    2. `-e ENVIRONMENT="<some env>"`  tells docker to add an environment variable called  `ENVIRONMENT`  with the value  `<some env>`
+    3. `--rm`  tells docker to remove the container after it finished
+    4. `-v ${PWD}/reports:/paf/reports`  tells docker to attach your current path to the  `reports`  folder to the  `/paf/reports`  folder inside docker to have access to the reports after completion
         1.  `${PWD}`  will print your current working directory and will work on all linux and Mac systems
-        2.  For Windows PowerShell use:  `-v "$((Get-Item reports).FullName)":/paf/reports`
+        2.  For Windows PowerShell use:  `-v $pwd\reports:/paf/reports`
         3.  For Windows Command prompt use:  `-v (@echo %cd%\reports):/paf/reports`
-    5.  `--name pff`  tells docker to name the started container  `pff`
-    6.  `paf`  is the docker image we are executing which we named in step 3.
-    7.  `--template=html1/index.html`  specifies the to use as a global template from the python packages
+    5. `--name pff`  tells docker to name the started container  `pff`
+    6. `paf`  is the docker image we are executing which we named in step 3.
+    7. `--template=html1/index.html`  specifies the to use as a global template from the python packages
+    8. The docker version runs pytest with coverage by default
+    9. To run tests with the rerun module: `docker run -d -e ENVIRONMENT="<some env>" --rm -v ${PWD}/reports:/paf/reports --name pff paf --template=html1/index.html --reruns=5` where `5` is the number of times the tests will be retried before the result is final
+        1. You can also add a delay (in seconds) between the reruns: `--reruns-delay=1`
+        2. You can also specify to only rerun the tests on specific errors: `--only-rerun=AssertionError --only-rerun=ValueError`
+           1. Note that the errors come from python and any Python based error is supported
+        3. Tests cal also be marked as flaky and reran individually 
+        ```python 
+        @pytest.mark.flaky(reruns=5, reruns_delay=2)
+        ```
+        4. Tests can also be marked for reruns based on conditions such as running platform
+        ```python 
+        @pytest.mark.flaky(reruns=5, condition=sys.platform.startswith("win32"))
+        ```
 6.  The docker container can take all the filters and flags from the normal pytest run for it’s execution such as:
-    1.  `docker run -d -e ENVIRONMENT="<some env>" --rm -v ${PWD}/reports:/paf/reports --name pff paf --template=html1/index.html -m=login`  will run all the tests marked with the  `login`  tag
+    1.  `docker run -d -e ENVIRONMENT="<some env>" --rm -v ${PWD}/reports:/paf/reports --name pff paf --template=html1/index.html -m=playground`  will run all the tests marked with the  `playground`  tag
         1.  Caveat, all flags must use the  `=`  operator to assign the values
-    2.  `docker run -d -e ENVIRONMENT="<some env>" --rm -v ${PWD}/reports:/paf/reports --name pff paf --template=html1/index.html -m="not login"`  will execute exactly as the local version
+    2.  `docker run -d -e ENVIRONMENT="<some env>" --rm -v ${PWD}/reports:/paf/reports --name pff paf --template=html1/index.html -m="not playground"`  will execute exactly as the local version
     3.  `docker run -d -e ENVIRONMENT="<some env>" --rm -v ${PWD}/reports:/paf/reports --name pff paf --template=html1/index.html --browser firefox --browser chromium --browser webkit`  will run exactly as the local version
 7.  While docker runs in detached mode, you will not have access to the console output. to get it, you must follow the logs:
     1.  `docker run -d -e ENVIRONMENT="<some env>" --rm -v ${PWD}/reports:/paf/reports --name pff paf --template=html1/index.html ;docker logs -f pff`
@@ -105,19 +131,20 @@ Note: the current conftest.py contains a custom versions of  [https://pypi.org/p
 The TestRail integration is currently not available but code has been put in place for its support. In the conftest.py file, identify the  `def test_listeners`  method and modify it there.
 
 ```python
-@pytest.fixture(autouse=True, scope="function")  
-def test_listeners(request):  
-    yield  
-  # request.node is an "item" because we use the default  
-  #"function" scope  if request.node.rep_call.failed:  
-        # TODO Testrail code for "fail" goes here  
-  logging.info(f"executing test failed! {request.node.rep_call.longrepr.reprcrash.message}")  
-    elif request.node.rep_call.passed:  
-        # TODO Testrail code for "pass" goes here  
-  logging.info(f"executing test passed {request.node.nodeid}")  
-    elif request.node.rep_call.skipped:  
-        # TODO Testrail code for "skipped" goes here  
-  logging.info(f"executing test skipped {request.node.nodeid}")
+@pytest.fixture(autouse=True, scope="function")
+def test_listeners(request):
+    yield
+    # request.node is an "item" because we use the default
+    # "function" scope
+    if request.node.rep_call.failed:
+        # TODO Testrail code for "fail" goes here
+        logging.info(f"executing test failed! {request.node.rep_call.longrepr.reprcrash.message}")
+    elif request.node.rep_call.passed:
+        # TODO Testrail code for "pass" goes here
+        logging.info(f"executing test passed {request.node.nodeid}")
+    elif request.node.rep_call.skipped:
+        # TODO Testrail code for "skipped" goes here
+        logging.info(f"executing test skipped {request.node.nodeid}")
 ```
 
 In each of the conditionals above, code can be added to handle the TestRail API requests. The  `request`  object will have all of the information pertaining to the test at each point and status of the test. For example, different actions can be performed if a test passes as opposed to the test failing or being skipped.
@@ -129,22 +156,16 @@ Test description and long names are also supported:
 ```python
 @pytest.mark.parametrize('email, password', [  
   (Users.ADMINISTRATOR["username"], Users.ADMINISTRATOR["password"]),  
-  (Users.ACCOUNT_MANAGER["username"], Users.ACCOUNT_MANAGER["password"]),  
-  (Users.MARKETEER["username"], Users.MARKETEER["password"]),  
-  (Users.MERCHANDISER["username"], Users.MERCHANDISER["password"]),  
-  (Users.PLANNER["username"], Users.PLANNER["password"]),  
-  (Users.READ_ONLY["username"], Users.READ_ONLY["password"]),  
-  (Users.CUSTOMER["username"], Users.CUSTOMER["password"])  
 ])
 @pytest.mark.login  
 def test_login(self, email, password):  
     """Login page very long description here for user"""  
-	self.login_page.navigate_to_page()  
+    self.login_page.navigate_to_page()  
     self.login_page.click_login_redirect_button()  
     self.login_page.okta_login(email, password)  
-    self.brands_page.click_avatar_button()  
-    role = self.brands_page.get_profile_modal_role()  
-    assert role.lower() in email.lower()
+    # self.brands_page.click_avatar_button()  
+    # role = self.brands_page.get_profile_modal_role()  
+    # assert role.lower() in email.lower()
 ```
 
 In the above code we can see the sequence  `"""Login page very long description here for user"""`. This is called a docstring and is parable inside any fixture, including the  `test_listeners`  area. This can be used to add long descriptive names to tests including extra data to be parsed and sent to TestRail as part of potential TestRail test creation if the test Does not already exist in TestRail. The exact point where the description can be obtained is  `request.node.rep_call.description`  which can be parsed as needed.

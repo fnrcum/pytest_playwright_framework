@@ -9,7 +9,7 @@ RUN mkdir reports
 RUN pip3 install -r requirements.txt \
     && playwright install
 
-ENTRYPOINT ["pytest"]
+ENTRYPOINT ["pytest", "-v", "--cov", "PAF", "--cov-report", "html"]
 CMD [" "]
 
 

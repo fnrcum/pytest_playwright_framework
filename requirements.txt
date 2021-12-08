@@ -11,3 +11,5 @@ pytest-base-url
 pytest-reporter
 pytest-reporter-html1
 pytest-rerunfailures
+pytest-metadata
+pytest-cov

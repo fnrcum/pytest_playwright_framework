@@ -6,3 +6,5 @@ venv
 log
 results
 reports
+__pycache__
+.coverage

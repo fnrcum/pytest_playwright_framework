@@ -1,0 +1,13 @@
+[html]
+directory = reports/coverage
+
+[run]
+branch = True
+omit =
+    *conftest*
+    *__init__*
+    */bases/*
+    */data/*
+    */endpoints/*
+    */helpers/*
+    */page/*

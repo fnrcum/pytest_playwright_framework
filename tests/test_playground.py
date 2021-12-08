@@ -18,6 +18,7 @@ class Tests:
         ('second case', 2),
     ])
     @pytest.mark.param
+    @pytest.mark.playground
     def test_func(self, page, value_A, value_B):
         """Test Showing us how params work in PyTest"""
         self.page.goto("http://www.uitestingplayground.com/")
@@ -27,6 +28,7 @@ class Tests:
         assert value_B in [1, 2]
 
     @pytest.mark.click
+    @pytest.mark.playground
     def test_click(self):
         self.page.goto("http://www.uitestingplayground.com/")
         self.page.click("text=Click")
@@ -35,12 +37,14 @@ class Tests:
         self.playground_page.bad_button.click()
 
     @pytest.mark.loadDelay
+    @pytest.mark.playground
     def test_load_delay(self, page):
         self.page.goto("http://www.uitestingplayground.com/")
         self.page.click("text=Load Delay")
         self.page.click(".btn")
 
     @pytest.mark.input
+    @pytest.mark.playground
     def test_input(self, page):
         """Test showing us how input works. Intentional fail"""
         self.page.goto("http://www.uitestingplayground.com/textinput")
@@ -49,18 +53,21 @@ class Tests:
         assert page.inner_text("#updatingButton") == "Some New Name1", "Intentional fail"
 
     @pytest.mark.fail
+    @pytest.mark.playground
     def test_scrollbars(self, page):
         """Failing test on purpose"""
         self.page.goto("http://www.uitestingplayground.com/scrollbars")
         self.page.click("#hidingButton")
         assert 1 == 2, "Intentional fail"
 
+    @pytest.mark.playground
     def test_login_fail(self, page):
         self.page.goto("http://www.uitestingplayground.com/sampleapp")
         self.page.fill('//input[@placeholder="User Name"]', "Nicu")
         self.page.click("#login")
         assert page.inner_text("#loginstatus") == "Invalid username/password"
 
+    @pytest.mark.playground
     def test_login_logout(self, page):
         self.page.goto("http://www.uitestingplayground.com/sampleapp")
         self.page.fill('//input[@placeholder="User Name"]', "Nicu")
@@ -72,10 +79,12 @@ class Tests:
         self.page.click("#login")
         assert self.page.inner_text("#loginstatus") == "User logged out."
 
+    @pytest.mark.playground
     def test_nonbreakingspace(self, page):
         self.page.goto("http://www.uitestingplayground.com/nbsp")
         self.page.click("text=My Button")
 
+    @pytest.mark.playground
     def test_progress_bar(self, page):
         self.page.goto("http://www.uitestingplayground.com/progressbar")
         self.page.click("#startButton")
